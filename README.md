@@ -17,4 +17,20 @@
     </p>
 </div>
 
+----------
+
+## 😋 Support project
+
+> 💜 Please support the project so that I can continue to develop it
+
+- BTC: `bc1qd2j53p9nplxcx4uyrv322t3mg0t93pz6m5lnft`
+- ETH: `0x284E6121362ea1C69528eDEdc309fC8b90fA5578`
+- ZEC: `t1Jb5tH61zcSTy2QyfsxftUEWHikdSYpPoz`
+
+- Or by my music on [🔷 bandcamp](https://f3rni.bandcamp.com/)
+
+- Or [message me](https://t.me/f33rni) if you would like to donate in other way 💰
+
+----------
+
 ## 🚧 README coming soon
