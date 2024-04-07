@@ -430,10 +430,14 @@ class YTDlPProcessor:
                 title = search_result.get("fulltitle")
                 if title is None:
                     title = search_result.get("title")
+                if title is None:
+                    title = "Untitled"
                 link = search_result.get("webpage_url")
                 channel = search_result.get("channel")
                 if channel is None:
                     channel = search_result.get("uploader")
+                if channel is None:
+                    channel = "Unnamed"
                 formats = search_result.get("formats", [])
                 is_live = search_result.get("is_live", False)
                 if not id_ or not extractor or not title or not link or not channel or len(formats) == 0 or is_live:
@@ -565,7 +569,9 @@ class YTDlPProcessor:
         for format_ in formats:
             # Make sure it has format_id and filesize and filesize didn't exceed max_file_size
             format_id = format_.get("format_id")
-            filesize = format_.get("filesize", 0)
+            filesize = format_.get("filesize")
+            if filesize is None or not isinstance(filesize, int):
+                filesize = 0
             if not format_id or filesize > self.config.get("max_file_size", 1073741824):
                 continue
 
