@@ -2,7 +2,7 @@
     "error_common": "❌ {error}",
     "error_send": "❌ Unable to send message. Please retry",
     "error_expired": "❌ The request is expired! Please make a new one",
-    "start": "🦐 Liberty Media Bot v.{version}\n\n💜 Author: Fern Lane (aka F3RNI)\n😺 GitHub page: https://github.com/F33RNI/liberty-media-telegram-bot\n\n😋 Support project\n- BTC: `bc1qd2j53p9nplxcx4uyrv322t3mg0t93pz6m5lnft`\n- ETH: `0x284E6121362ea1C69528eDEdc309fC8b90fA5578`\n- ZEC: `t1Jb5tH61zcSTy2QyfsxftUEWHikdSYpPoz`\n- Or by my music on [🔷 bandcamp](https://f3rni.bandcamp.com/)\n- Or message @f33rni if you would like to donate in other way 💰\n\n\n💬 Now send me a search request or a link to download👇\nExample: `f3rni veil of tomorrow`",
+    "start": "🦐 Liberty Media Bot v.{version}\n\n💜 Author: Fern Lane (aka F3RNI)\n😺 GitHub page: https://github.com/F33RNI/liberty-media-telegram-bot\n\n😋 Support project\n- BTC: `bc1qd2j53p9nplxcx4uyrv322t3mg0t93pz6m5lnft`\n- ETH: `0x284E6121362ea1C69528eDEdc309fC8b90fA5578`\n- ZEC: `t1Jb5tH61zcSTy2QyfsxftUEWHikdSYpPoz`\n- Or by my music on [🔷 bandcamp](https://f3rni.bandcamp.com/)\n- Or message @f33rni if you would like to donate in other way 💰\n\n\n💬 Now send me a search request or a link to download👇\n\nExamples:\n\n`F3rni veil of tomorrow`\n\n`https://soundcloud.com/f3rni/whats-next`",
     "empty_message": "❌ Received empty message",
     "error_queue_full": "❌ The queue is full! Wait a bit and try again",
     "searching": "🔍 Searching: `{query}`",
