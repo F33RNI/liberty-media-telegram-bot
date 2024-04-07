@@ -470,6 +470,7 @@ class YTDlPProcessor:
                 self._cache_put(search_result)
 
                 # Append to the final (parsed) results
+                full_name, icon = self.extractor_name_to_full_name_and_icon(extractor)
                 result = {
                     "extractor": extractor,
                     "extractor_icon": icon,
@@ -481,7 +482,6 @@ class YTDlPProcessor:
                     "metadata": metadata,
                 }
                 if result not in results:
-                    full_name, icon = self.extractor_name_to_full_name_and_icon(extractor)
                     results.append(result)
 
         # Log error
