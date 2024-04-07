@@ -904,9 +904,31 @@ class YTDlPProcessor:
         Args:
             entry (Dict): raw information dictionary
         """
+        # Discard all previous occurrences
+        discarded = 0
+        while True:
+            index_to_pop = -1
+            if "extractor" in entry and "id" in entry:
+                for i, cache_entry in enumerate(self._search_cache):
+                    if cache_entry.get("extractor") == entry["extractor"] and cache_entry.get("id") == entry["id"]:
+                        index_to_pop = i
+                        break
+            if index_to_pop < 0:
+                break
+            self._search_cache.pop(index_to_pop)
+            discarded += 1
+
+        # Check size and discard extra entries
         if len(self._search_cache) >= _SEARCH_CACHE_ENTRIES:
             self._search_cache.pop(0)
-        self._search_cache.append(entry)
+            discarded += 1
+
+        # Log number of discarded items
+        if discarded != 0:
+            logging.info(f"Discarded {discarded} items from cache")
+
+        # Put to the beginning
+        self._search_cache.insert(0, entry)
 
     def _cache_get(self, extractor_name: str, id_: str) -> Dict or None:
         """Searches entry by video / track ID and extractor key in self._search_cache
