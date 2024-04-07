@@ -351,7 +351,7 @@ class BotHandler:
         self._database_set_data(chat_id, "rename", "title", title)
         self._database_set_data(chat_id, "rename", "channel", channel)
         self._database_set_data(chat_id, "rename", "names", [])
-        self._database_set_data(chat_id, "rename", "renamed", False)
+        self._database_set_data(chat_id, "rename", "in_process", False)
 
         # We already have a proper track title and artist name
         if from_metadata:
@@ -466,7 +466,7 @@ class BotHandler:
         self._database_set_data(chat_id, "rename", "callback", "id", id_)
         self._database_set_data(chat_id, "rename", "callback", "format_id", format_id)
         self._database_set_data(chat_id, "rename", "callback", "bitrate", bitrate)
-        self._database_set_data(chat_id, "rename", "renamed", False)
+        self._database_set_data(chat_id, "rename", "in_process", True)
 
         # Add back button
         buttons.append(
@@ -623,7 +623,7 @@ class BotHandler:
 
         self._database_set_data(chat_id, "rename", "final", "author", author)
         self._database_set_data(chat_id, "rename", "final", "title", title)
-        self._database_set_data(chat_id, "rename", "renamed", True)
+        self._database_set_data(chat_id, "rename", "in_process", False)
 
     async def _search(self, chat_id: int, request: str, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Searches using "request" and sends search results to the user
@@ -680,7 +680,7 @@ class BotHandler:
             self._database_get_data(chat_id, "rename") is not None
             and self._database_get_data(chat_id, "rename", "final", "title") is None
             and self._database_get_data(chat_id, "rename", "final", "channel") is None
-            and self._database_get_data(chat_id, "rename", "renamed")
+            and self._database_get_data(chat_id, "rename", "in_process")
         ):
             await self._rename(chat_id, request, context)
             await self.markup_dwn(
