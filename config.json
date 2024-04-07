@@ -40,7 +40,7 @@
             "keys": ["Bandcamp"],
             "icon": "🔷",
             "full_name": "🔷 bandcamp",
-            "args": {}
+            "args": {"proxy": ""}
         },
         {
             "enabled": true,
@@ -65,6 +65,14 @@
             "icon": "⬛️",
             "full_name": "⬛️ PornHub",
             "args": {}
+        },
+        {
+            "enabled": true,
+            "name": "twitter",
+            "keys": ["twitter", "twitter:shortener"],
+            "icon": "⬛️",
+            "full_name": "⬛️ X (Twitter)",
+            "args": {"proxy": ""}
         }
     ],
 

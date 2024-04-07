@@ -340,6 +340,8 @@ class YTDlPProcessor:
             return "https://vk.com/vkvideo?z=video" + id_
         elif extractor.lower() == "pornhub":
             return "https://rt.pornhub.com/view_video.php?viewkey=" + id_
+        elif extractor.startswith("twitter"):
+            return "https://twitter.com/starwars/status/" + id_
 
         return id_
 
