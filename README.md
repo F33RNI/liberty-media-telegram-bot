@@ -1,4 +1,4 @@
-# 🕊️ liberty-media-telegram-bot
+# 🦐 liberty-media-telegram-bot
 
 | ![Project logo](logo.jpg) | <h3>YT_DLP based Telegram bot for downloading media files from popular stream platforms</h3> |
 | ------------------------- | :------------------------------------------------------------------------------------------: |
