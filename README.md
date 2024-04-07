@@ -33,4 +33,43 @@
 
 ----------
 
+## 🐧 Running as service on linux
+
+1. Install Python **3.10** / **3.11** *(not tested on other versions)*, `venv` and `pip`
+2. Clone repo
+   1. `git clone https://github.com/F33RNI/liberty-media-telegram-bot.git`
+   2. `cd liberty-media-telegram-bot`
+3. Create venv `python -m venv venv` / `python3 -m venv venv` / `python3.10 -m venv venv` / `python3.11 -m venv venv`
+4. Carefully change all the settings in `config.json` file
+5. Install systemd
+   1. `sudo apt-get install -y systemd`
+6. Create new service file
+   1. `sudo nano /etc/systemd/system/liberty-media-telegram-bot.service`
+
+      ```ini
+      [Unit]
+      Description=liberty-media-telegram-bot service
+      After=multi-user.target
+      
+      [Service]
+      Type=simple
+      Restart=on-failure
+      RestartSec=5
+      
+      WorkingDirectory=YOUR DIRECTORY HERE/liberty-media-telegram-bot
+      ExecStart=YOUR DIRECTORY HERE/liberty-media-telegram-bot/run.sh
+      
+      [Install]
+      WantedBy=multi-user.target
+      
+      ```
+
+7. Reload systemctl daemon
+   1. `sudo systemctl daemon-reload`
+8. Enable and start service
+   1. `sudo systemctl enable liberty-media-telegram-bot`
+   2. `sudo systemctl start liberty-media-telegram-bot`
+
+----------
+
 ## 🚧 README coming soon
