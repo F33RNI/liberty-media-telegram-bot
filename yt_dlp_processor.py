@@ -484,7 +484,11 @@ class YTDlPProcessor:
                             upload_datetime = datetime.datetime.strptime(metadata_info, "%Y%m%d")
                             metadata.append(metadata_formatter.format(upload_datetime))
                         else:
-                            metadata.append(metadata_formatter.format(metadata_info))
+                            try:
+                                metadata_int = int(metadata_info)
+                                metadata.append(metadata_formatter.format(human_format(metadata_int)))
+                            except:
+                                metadata.append(metadata_formatter.format(metadata_info))
                     except Exception as e_:
                         logging.warning(f"Cannot format metadata {metadata_key}: {e_}")
 
