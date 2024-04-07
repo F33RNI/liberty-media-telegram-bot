@@ -334,7 +334,7 @@ class YTDlPProcessor:
                 return link
 
         # Now the chances are very low...
-        if extractor == "soundcloud" or extractor.lower() == "bandcamp":
+        if extractor == "soundcloud" or extractor.lower() == "bandcamp" or extractor == "yandexmusic:track":
             return None
         elif extractor == "vk":
             return "https://vk.com/vkvideo?z=video" + id_
@@ -427,18 +427,40 @@ class YTDlPProcessor:
                 # Check for basic data
                 id_ = search_result.get("id")
                 extractor = search_result.get("extractor")
-                title = search_result.get("fulltitle")
+
+                # Title
+                title = search_result.get("track")
+                if title is None:
+                    title = search_result.get("fulltitle")
                 if title is None:
                     title = search_result.get("title")
                 if title is None:
                     title = "Untitled"
+
                 link = search_result.get("webpage_url")
-                channel = search_result.get("channel")
+
+                # Channel / uploader
+                channel = search_result.get("artist")
+                if channel is None:
+                    channel = search_result.get("channel")
                 if channel is None:
                     channel = search_result.get("uploader")
                 if channel is None:
                     channel = "Unnamed"
+
                 formats = search_result.get("formats", [])
+
+                # Try to use info itself as formats (Yandex Music fix)
+                if (
+                    len(formats) == 0
+                    and "url" in search_result
+                    and "thumbnail" in search_result
+                    and ("video_ext" in search_result or "audio_ext" in search_result)
+                    and ("vbr" in search_result or "abr" in search_result or "tbr" in search_result)
+                ):
+                    formats = [search_result]
+                    search_result["formats"] = formats
+
                 is_live = search_result.get("is_live", False)
                 if not id_ or not extractor or not title or not link or not channel or len(formats) == 0 or is_live:
                     logging.warning(f"Skipping search result {i}")
@@ -585,6 +607,11 @@ class YTDlPProcessor:
             if not audio_ext and not video_ext:
                 continue
 
+            # Fix for Yandex Music
+            if video_ext == "mp3":
+                audio_ext = "mp3"
+                video_ext = None
+
             # Retrieve video resolution and bitrates
             width = format_.get("width")
             height = format_.get("height")
@@ -592,7 +619,7 @@ class YTDlPProcessor:
             if width and height:
                 resolution = f"{width}x{height}"
             resolution = format_.get("resolution", resolution)
-            if resolution.lower() == "audio only":
+            if resolution is not None and resolution.lower() == "audio only":
                 resolution = None
             vbr = format_.get("vbr")
             if vbr is None:
@@ -777,13 +804,20 @@ class YTDlPProcessor:
             if id_ is None:
                 raise Exception("Unable to recover search query. Request is expired. Please make a new one")
 
+            # Yandex Music fix
+            formats = None
+            if extractor == "yandexmusic:track":
+                info = self._cache_get(extractor, id_)
+                if info is not None and "formats" in info:
+                    formats = info["formats"]
+
             # Try each enabled extractors until downloaded
             for extractor_ie_key, _ in extractors_:
                 if self._filename is not None:
                     break
                 try:
                     logging.info(f"Trying to download using {extractor_ie_key} extractor")
-                    ydl.extract_info(id_, download=True, ie_key=extractor_ie_key)
+                    ydl.extract_info(id_, download=True, ie_key=extractor_ie_key, extra_info={"formats": formats})
                 except Exception as e:
                     logging.warning(f"Unable to download using {extractor_ie_key} extractor: {e}")
                 if self._timed_out:

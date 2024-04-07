@@ -31,7 +31,7 @@
             ],
             "icon": "🟧",
             "full_name": "🟧 SoundCloud",
-            "args": {"secret_token": ""},
+            "args": {"secret_token": "", "proxy": ""},
             "search_query_formatter": "scsearch3:{query}"
         },
         {
@@ -51,9 +51,9 @@
             "args": {}
         },
         {
-            "enabled": false,
-            "name": "yandexmusic",
-            "keys": ["yandexmusic", "yandexmusic:track"],
+            "enabled": true,
+            "name": "yandexmusic:track",
+            "keys": ["yandexmusic:track"],
             "icon": "🔴",
             "full_name": "🔴 Yandex Music",
             "args": {}
