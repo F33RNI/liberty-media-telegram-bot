@@ -33,15 +33,14 @@ from telegram.ext import (
     filters,
     CallbackQueryHandler,
 )
-from bot_helpers import build_menu, send_safe
 
+from _version import __version__
+from bot_helpers import build_menu, send_safe
 from guess_track_title import guess_track_title
 from queue_processor import QueueProcessor
 from yt_dlp_processor import YTDlPProcessor
 
-# User commands
 BOT_COMMAND_START = "start"
-BOT_COMMAND_HELP = "help"
 
 
 class BotHandler:
@@ -141,16 +140,15 @@ class BotHandler:
             # Commands
             logging.info("Adding command handlers")
             self._application.add_handler(CommandHandler(BOT_COMMAND_START, self.bot_command_start))
-            self._application.add_handler(CommandHandler(BOT_COMMAND_HELP, self.bot_command_help))
 
             # Handle messages
             logging.info("Adding message handlers")
             self._application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), self.bot_message))
             self._application.add_handler(MessageHandler(filters.PHOTO & (~filters.COMMAND), self.bot_message))
 
-            # Unknown command -> send help
+            # Unknown command -> send /start
             logging.info("Adding unknown command handler")
-            self._application.add_handler(MessageHandler(filters.COMMAND, self.bot_command_help))
+            self._application.add_handler(MessageHandler(filters.COMMAND, self.bot_command_start))
 
             # Add buttons handler
             logging.info("Adding markup handler")
@@ -700,20 +698,6 @@ class BotHandler:
         else:
             await self._search(chat_id, request, context)
 
-    async def bot_command_help(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        """/help command callback
-
-        Args:
-            update (Update): update object from bot's callback
-            context (ContextTypes.DEFAULT_TYPE): context object from bot's callback
-        """
-        chat_id = update.effective_chat.id
-        user_name = str(update.effective_chat.effective_name)
-        logging.info(f"/help command from {user_name} ({chat_id})")
-
-        # Send help message
-        await send_safe(chat_id=chat_id, text=self.messages["help"], context=context)
-
     async def bot_command_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """/start command callback
 
@@ -725,6 +709,7 @@ class BotHandler:
         user_name = str(update.effective_chat.effective_name)
         logging.info(f"/start command from {user_name} ({chat_id})")
 
-        # Send start and help messages
-        await send_safe(chat_id=chat_id, text=self.messages["start"], context=context)
-        await send_safe(chat_id=chat_id, text=self.messages["help"], context=context)
+        # Send start message
+        await send_safe(
+            chat_id=chat_id, text=self.messages["start"].format(version=__version__), context=context, markdown=True
+        )
