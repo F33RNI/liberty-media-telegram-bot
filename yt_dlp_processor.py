@@ -19,6 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import datetime
+import gc
 import logging
 import math
 import os
@@ -264,7 +265,7 @@ class YTDlPProcessor:
 
             except Exception as e_:
                 logging.warning(f"Cannot add {extractor.get('name')} extractors. Skipping it. Error: {e_}")
-            logging.info(f"{extractor['name']} extractors: {' ,'.join(added)}")
+            logging.info(f"{extractor['name']} extractors: {', '.join(added)}")
 
         ydl.add_default_info_extractors()
 
@@ -318,7 +319,7 @@ class YTDlPProcessor:
 
         Args:
             extractor (str or None): (ex. "youtube")
-            id_ (str): video / audio ID
+            id_ (str): video / audio ID (NOT link)
 
         Returns:
             str or None: "fixed" ID (URL in most cases) or None if it's impossible to fix
@@ -516,6 +517,9 @@ class YTDlPProcessor:
         except Exception as e:
             logging.error(f"Error searching using '{query}' query", exc_info=e)
 
+        finally:
+            gc.collect()
+
         logging.info(f"Found {len(results)} usable results")
         return results
 
@@ -524,7 +528,7 @@ class YTDlPProcessor:
 
         Args:
             extractor (str): extractor name (key) (ex. "youtube")
-            id_ (str): video / audio ID or link
+            id_ (str): video / audio ID (NOT link)
 
         Raises:
             Exception: expired / other error
@@ -567,10 +571,10 @@ class YTDlPProcessor:
         # Search
         else:
             logging.info(f"Not found in cache. Extracting formats from {extractor} media: {id_}")
-            id_ = self.fix_id(extractor, id_)
-            if id_ is None:
+            id_fixed_ = self.fix_id(extractor, id_)
+            if id_fixed_ is None:
                 raise Exception("Unable to recover search query. Request is expired. Please make a new one")
-            self.search(id_, extractor_name=extractor)
+            self.search(id_fixed_, extractor_name=extractor)
             info = self._cache_get(extractor, id_)
 
         # Check again (just in case)
@@ -728,7 +732,7 @@ class YTDlPProcessor:
 
         Args:
             extractor (str): extractor name (key) (ex. "youtube")
-            id_ (str): video / audio ID or link
+            id_ (str): video / audio ID (NOT link)
             format_id (str): ID of format to download
             is_audio (bool): True if it's audio, False if it's video
             target_format (str): target_format_audio ot target_format_video from main config (ex. "mp3")
@@ -778,56 +782,71 @@ class YTDlPProcessor:
         self._timed_out = False
 
         logging.info(f"Downloading {extractor} media {id_} into {self.temp_dir} directory")
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # Add extractors
-            extractors_ = self._add_extractors(ydl, extractor_name=extractor)
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                # Add extractors
+                extractors_ = self._add_extractors(ydl, extractor_name=extractor)
 
-            # Convert to MP3 -> Inject artist - track into info -> Embed metadata -> Prepare thumbnail -> Embed it
-            if is_audio:
-                ydl.add_post_processor(
-                    yt_dlp.postprocessor.FFmpegExtractAudioPP(
-                        ydl, preferredcodec=target_format, preferredquality=audio_target_bitrate
+                # Convert to MP3 -> Inject artist - track into info -> Embed metadata -> Prepare thumbnail -> Embed it
+                if is_audio:
+                    ydl.add_post_processor(
+                        yt_dlp.postprocessor.FFmpegExtractAudioPP(
+                            ydl, preferredcodec=target_format, preferredquality=audio_target_bitrate
+                        )
                     )
-                )
-                ydl.add_post_processor(ArtistTrackInjectorPP(ydl, track=audio_title, artist=audio_author))
-                ydl.add_post_processor(yt_dlp.postprocessor.FFmpegMetadataPP(ydl))
-                ydl.add_post_processor(AlbumArtPP(ydl))
-                ydl.add_post_processor(yt_dlp.postprocessor.EmbedThumbnailPP(ydl))
-
-            # Convert to MP4 -> Embed thumbnail
-            else:
-                ydl.add_post_processor(yt_dlp.postprocessor.FFmpegVideoConvertorPP(ydl, preferedformat=target_format))
-                try:
+                    ydl.add_post_processor(ArtistTrackInjectorPP(ydl, track=audio_title, artist=audio_author))
+                    ydl.add_post_processor(yt_dlp.postprocessor.FFmpegMetadataPP(ydl))
+                    ydl.add_post_processor(AlbumArtPP(ydl))
                     ydl.add_post_processor(yt_dlp.postprocessor.EmbedThumbnailPP(ydl))
-                except Exception as e:
-                    logging.warning(f"Unable to embed thumbnail to video file: {e}")
 
-            # Rename into safe name
-            ydl.add_post_processor(RenamePP(ydl, is_audio))
+                # Convert to MP4 -> Embed thumbnail
+                else:
+                    ydl.add_post_processor(
+                        yt_dlp.postprocessor.FFmpegVideoConvertorPP(ydl, preferedformat=target_format)
+                    )
+                    try:
+                        ydl.add_post_processor(yt_dlp.postprocessor.EmbedThumbnailPP(ydl))
+                    except Exception as e:
+                        logging.warning(f"Unable to embed thumbnail to video file: {e}")
 
-            # Try to recover ID
-            id_ = self.fix_id(extractor, id_)
-            if id_ is None:
-                raise Exception("Unable to recover search query. Request is expired. Please make a new one")
+                # Rename into safe name
+                ydl.add_post_processor(RenamePP(ydl, is_audio))
 
-            # Yandex Music fix
-            formats = None
-            if extractor == "yandexmusic:track":
-                info = self._cache_get(extractor, id_)
-                if info is not None and "formats" in info:
-                    formats = info["formats"]
+                # Try to recover ID
+                id_fixed_ = self.fix_id(extractor, id_)
+                if id_fixed_ is None:
+                    raise Exception("Unable to recover search query. Request is expired. Please make a new one")
 
-            # Try each enabled extractors until downloaded
-            for extractor_ie_key, _ in extractors_:
-                if self._filename is not None:
-                    break
-                try:
-                    logging.info(f"Trying to download using {extractor_ie_key} extractor")
-                    ydl.extract_info(id_, download=True, ie_key=extractor_ie_key, extra_info={"formats": formats})
-                except Exception as e:
-                    logging.warning(f"Unable to download using {extractor_ie_key} extractor: {e}")
-                if self._timed_out:
-                    raise Exception(f"Timed out downloading with {extractor_ie_key} extractor")
+                # Yandex Music fix
+                formats = None
+                if extractor == "yandexmusic:track":
+                    info = self._cache_get(extractor, id_)
+                    if info is not None and "formats" in info:
+                        formats = info["formats"]
+
+                # Try each enabled extractors until downloaded
+                for extractor_ie_key, _ in extractors_:
+                    if self._filename is not None:
+                        break
+                    try:
+                        logging.info(f"Trying to download using {extractor_ie_key} extractor")
+                        ydl.extract_info(
+                            id_fixed_, download=True, ie_key=extractor_ie_key, extra_info={"formats": formats}
+                        )
+                    except Exception as e:
+                        logging.warning(f"Unable to download using {extractor_ie_key} extractor: {e}")
+                    if self._timed_out:
+                        raise Exception(f"Timed out downloading with {extractor_ie_key} extractor")
+        finally:
+            logging.info("Cleaning ydl_opts")
+            try:
+                del ydl_opts["outtmpl"]
+                del ydl_opts["format"]
+                del ydl_opts["post_hooks"]
+                del ydl_opts["progress_hooks"]
+                del ydl_opts["postprocessor_hooks"]
+            except Exception as e:
+                logging.warning(f"Unable to clean ydl_opts: {e}")
 
         logging.info("Downloading finished")
         return self._filename
@@ -842,6 +861,8 @@ class YTDlPProcessor:
                 shutil.rmtree(self.temp_dir)
             except Exception as e:
                 logging.error(f"Error deleting {self.temp_dir} directory: {e}")
+            finally:
+                gc.collect()
 
     def _download_progress_hook(self, progress_info: Dict) -> None:
         """Redirects some callback data into self._progress_callback without raising any error
