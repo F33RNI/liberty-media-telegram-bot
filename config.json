@@ -1,0 +1,118 @@
+{
+    "__comment01__": "Main config file of the mp3-downloader-telegram-bot project",
+
+    "__comment02__": "Provide your bot api key from <https://t.me/BotFather>",
+    "bot_token": "",
+
+    "__comment03__": "Enabled modules (extractors). You can add 'args': {} that will be passed into 'extractor_args'",
+    "extractors": [
+        {
+            "enabled": true,
+            "name": "youtube",
+            "keys": [
+                "youtube",
+                "youtube:search",
+                "youtube:search:date",
+                "youtube:search_url",
+                "youtube:truncated_id",
+                "youtube:truncated_url"
+            ],
+            "icon": "🟥",
+            "full_name": "🟥 YouTube",
+            "args": {},
+            "search_query_formatter": "ytsearch3:{query}"
+        },
+        {
+            "enabled": true,
+            "name": "soundcloud",
+            "keys": [
+                "soundcloud",
+                "soundcloud:search"
+            ],
+            "icon": "🟧",
+            "full_name": "🟧 SoundCloud",
+            "args": {"secret_token": ""},
+            "search_query_formatter": "scsearch3:{query}"
+        },
+        {
+            "enabled": true,
+            "name": "Bandcamp",
+            "keys": ["Bandcamp"],
+            "icon": "🔷",
+            "full_name": "🔷 bandcamp",
+            "args": {}
+        },
+        {
+            "enabled": true,
+            "name": "vk",
+            "keys": ["vk", "vk:*"],
+            "icon": "🟦",
+            "full_name": "🟦 VK",
+            "args": {}
+        },
+        {
+            "enabled": false,
+            "name": "yandexmusic",
+            "keys": ["yandexmusic", "yandexmusic:track"],
+            "icon": "🔴",
+            "full_name": "🔴 Yandex Music",
+            "args": {}
+        },
+        {
+            "enabled": true,
+            "name": "PornHub",
+            "keys": ["PornHub"],
+            "icon": "⬛️",
+            "full_name": "⬛️ PornHub",
+            "args": {}
+        }
+    ],
+
+    "__comment04__": "How to format some extra info. You can add any other key from extracted info here",
+    "metadata_formatters": {
+        "view_count": "{0} 👀",
+        "like_count": "{0} 👍",
+        "upload_date": "{0:%d %B %Y} 🗓️"
+    },
+
+    "__comment05__": "yt_dlp.YoutubeDL() base options for searching / extracting info / downloading",
+    "ydl_opts": {
+        "reactrictfilenames": true,
+        "noplaylist": true,
+        "nocheckcertificate": true,
+        "ignoreerrors": false,
+        "logtostderr": false,
+        "quiet": true,
+        "noprogress": true,
+        "no_warnings": true,
+        "default_search": "auto",
+        "source_addreacs": "0.0.0.0",
+        "writethumbnail": true,
+        "embedthumbnail": true,
+        "geo_bypass": true,
+        "proxy": ""
+    },
+
+    "__comment06__": "Maximum size of format in bytes (only used if 'filesize' key is available)",
+    "max_file_size": 31457280,
+
+    "__comment07__": "If 'elapsed' time in exceeded this value (in seconds), downloading will be aborted",
+    "download_timeout": 180,
+
+    "__comment08__": "Target formats to convert into",
+    "target_format_audio": "mp3",
+    "target_format_video": "mp4",
+
+    "__comment09__": "Paths to messages.json file",
+    "messages_file": "messages.json",
+
+    "__comment10__": "Each search and download request will be put to the queue. Specify it's size here",
+    "queue_size": 5,
+
+    "__comment11__": "Maximum time in which video / audio file must be sent (in seconds)",
+    "send_file_timeout": 60,
+
+    "__comment12__": "Progress bar settings. progress_edit_interval is to prevent 'Flood control exceeded' error",
+    "progress_edit_interval": 1,
+    "progress_bar_length": 10
+}
